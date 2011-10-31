@@ -3,9 +3,11 @@ package battlesea;
 import java.io.*;
 import java.util.Random;
 
-public class Main {
+public class Main 
+{
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException 
+    {
         int i = 7; //size of the field; supposed to be square
         int[][] field = new int[i][i]; //massive that is to be used for placing ships, 1 is ship, 0 is empty
         int k = 0; //int used for making fixed number of cycles
