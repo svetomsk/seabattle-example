@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Main 
 {
-
+//hello
     public static void main(String[] args) throws IOException 
     {
         int i = 7; //size of the field; supposed to be square
