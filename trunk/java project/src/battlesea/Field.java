@@ -75,20 +75,6 @@ public class Field
         }
         k = 0; //Unit test
         l = 0;
-        /*
-        System.out.println("###########---FIELD---###########");
-        while (k < SIZE)
-        {
-            while (l < SIZE)
-            {
-                System.out.print(Integer.toString(field[l][k]) + " ");
-                l++;
-            }
-            k++;
-            l = 0;
-            System.out.println(" ");
-        }
-        */
     }
 
     static boolean areNeighborsFree (int row, int col, int [][] field)
