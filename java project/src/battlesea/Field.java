@@ -6,8 +6,8 @@ import java.util.Random;
 public class Field
     {
 
-     private static final int SIZE = 7; //const used for size of the field
-     private static final int s = 3;    //quantity of 1x1(small) ships
+     private static final int SIZE = 3; //const used for size of the field
+     private static final int s = 1;    //quantity of 1x1(small) ships
 
      private static int [][] neighbors;
 
@@ -17,6 +17,11 @@ public class Field
      {
          field = new int[SIZE][SIZE];
          //massive that is used for placing ships(1 is ship, 0 is empty)
+     }
+     
+     public boolean isValidCoord(int col, int row, int size)
+     {
+         return row >= 0 && row < size && col >= 0 && col < size;
      }
      
      public int[][] getField()
@@ -62,7 +67,6 @@ public class Field
         }
         Random random = new Random();
         k = 0; //int used for making fixed number of cycles
-        int s = 3; //quantity of 1x1(small) ships
         while (k < s)
         {
             int r1 = Math.abs(random.nextInt()) % (SIZE); //random int r1(heights) from 0 to SIZE - 1
@@ -73,8 +77,6 @@ public class Field
                 ++k;
             }
         }
-        k = 0; //Unit test
-        l = 0;
     }
 
     static boolean areNeighborsFree (int row, int col, int [][] field)
