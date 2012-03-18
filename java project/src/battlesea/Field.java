@@ -6,8 +6,11 @@ import java.util.Random;
 public class Field
     {
 
-     private static final int SIZE = 3; //const used for size of the field
+     private static final int SIZE = 7; //const used for size of the field
      private static final int s = 1;    //quantity of 1x1(small) ships
+     private static final int m = 1;    //quantity of 1x2(medium) ships
+     private static final int b = 1;    //quantity of 1x3(big) ships
+     private static final int h = 1;    //quantity of 1x4(huge) ships
 
      private static int [][] neighbors;
 
@@ -33,6 +36,21 @@ public class Field
      {
          return s;
      }
+     
+     public int getMediumShips()
+     {
+         return m;
+     }
+     
+     public int getBigShips()
+     {
+         return b;
+     }
+     
+     public int getHugeShips()
+     {
+         return h;
+     }
 
      public int getSize()
      {
@@ -53,8 +71,8 @@ public class Field
      public void fillFieldByRandom() throws IOException
      {
         initNeighbors();
-        int k = 0; //int used for making fixed number of cycles
-        int l = 0; //int used for making fixed number of cycles
+        int k = 0; 
+        int l = 0; 
         while (k < SIZE)//cycle that fills all the places with 0
         {
             while (l < SIZE)
@@ -66,19 +84,49 @@ public class Field
             k++;
         }
         Random random = new Random();
-        k = 0; //int used for making fixed number of cycles
-        while (k < s)
+        for(int i = 0; i < s; i++)
         {
-            int r1 = Math.abs(random.nextInt()) % (SIZE); //random int r1(heights) from 0 to SIZE - 1
-            int r2 = Math.abs(random.nextInt()) % (SIZE); //random int r2(width) from 0 to SIZE - 1
-            if (areNeighborsFree(r1, r2, field) == true)
-            {
-                field[r1][r2] = 1;
-                ++k;
-            }
+            fillShipByRandom(random, field, 1);
+        }
+        for(int i = 0; i < m; i++)
+        {
+            fillShipByRandom(random, field, 2);
+        }
+        for(int i = 0; i < b; i++)
+        {
+            fillShipByRandom(random, field, 3);
+        }
+        for(int i = 0; i < h; i++)
+        {
+            fillShipByRandom(random, field, 4);
         }
     }
 
+    
+    private static void fillShipByRandom (Random random, int [][] field, int length)
+    {
+        boolean isSet = false;
+        while (!isSet)
+        {
+            int x1= Math.abs(random.nextInt()) % (SIZE);
+            int y1= Math.abs(random.nextInt()) % (SIZE);
+            int x2= Math.abs(random.nextInt()) % (2) - 1;//choosing the direction of rotation
+            int y2= Math.abs(random.nextInt()) % (2) - 1;
+            if(areNeighborsFree(x1, y1, field) 
+                && areNeighborsFree(x1+x2*length, y1+y2*length, field)
+                && (y2==0||x2==0)&&!((x2==0) && (y2==0))
+                && isValidCoord(x1+x2*length, y1+y2*length))
+            {
+                for (int l = 0; l < length; l++)
+                {
+                    field[x1 + x2*l][y1+y2*l] = 1;
+                }
+                isSet = true;
+            }
+        }
+    }
+    
+    
     static boolean areNeighborsFree (int row, int col, int [][] field)
     {
         for (int i = 0; i < 8; i++)
