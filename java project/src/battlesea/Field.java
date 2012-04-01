@@ -101,9 +101,9 @@ public class Field
             fillShipByRandom(random, field, 4);
         }
     }
-
     
-    private static void fillShipByRandom (Random random, int [][] field, int length)
+    private static void fillShipByRandom (Random random, int [][] field, 
+            int length)
     {
         boolean isSet = false;
         while (!isSet)
@@ -112,8 +112,7 @@ public class Field
             int y1= Math.abs(random.nextInt()) % (SIZE);
             int x2= Math.abs(random.nextInt()) % (2) - 1;//choosing the direction of rotation
             int y2= Math.abs(random.nextInt()) % (2) - 1;
-            if(areNeighborsFree(x1, y1, field) 
-                && areNeighborsFree(x1+x2*length, y1+y2*length, field)
+            if(Main.canPlaceShipHere(x1, y1, x1+x2*length, y1+y2*length, field)
                 && (y2==0||x2==0)&&!((x2==0) && (y2==0))
                 && isValidCoord(x1+x2*length, y1+y2*length))
             {
@@ -125,8 +124,7 @@ public class Field
             }
         }
     }
-    
-    
+        
     static boolean areNeighborsFree (int row, int col, int [][] field)
     {
         for (int i = 0; i < 8; i++)
