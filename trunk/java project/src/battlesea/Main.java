@@ -13,11 +13,13 @@ public class Main
         Field f1 = new Field();
         Field f2 = new Field();
         f1.fillFieldByRandom();
-        fillFieldByPlayer(f2, br);
+        f2.fillFieldByRandom();
+//        fillFieldByPlayer(f2, br);
         writeln(" ");
         final int SIZE = f1.getSize();
         Random random = new Random();
         printInvisibleFields(f1);
+        printInvisibleFields(f2);
         while (!victory)
         {
             makePlayerTurn(f1, br);
@@ -95,12 +97,9 @@ public class Main
                 int y1 = Integer.valueOf(br.readLine());
                 int x2 = Integer.valueOf(br.readLine());
                 int y2 = Integer.valueOf(br.readLine());
-                if (f2.isValidCoord(x1, y1)
-                        && f2.isValidCoord(x2, y2)
-                        && ((x1 == x2) || (y1 == y2))
-                        && f2.areNeighborsFree(x1, y1, Field)
-                        && f2.areNeighborsFree(x2, y2, Field)
-                        && (Math.abs(x1-x2) == l) || (Math.abs(y1-y2) == l))
+                if (((x1 == x2) || (y1 == y2))
+                        && canPlaceShipHere(x1, y1, x2, y2, Field)
+                        && ((Math.abs(x1-x2) == l) || (Math.abs(y1-y2) == l)))
 
                 {
                     for(int i = x1; i <= x2; i++)
@@ -139,6 +138,51 @@ public class Main
         }
     }
 
+    public static boolean canPlaceShipHere (int x1, int y1, int x2, int y2, 
+            int[][] field)
+    {
+        int l = field[0].length;
+        if((x1 < l) && (y1 < l) && (x2 < l) && (y2 < l))
+        {
+            for(int i = x1; i <= x2; i++)
+            {
+                if(!Field.areNeighborsFree(i, y1, field))
+                {
+                    return false;
+                }
+            }
+            for(int i = x2; i <= x1; i++)
+            {
+                if(!Field.areNeighborsFree(i, y1, field))
+                {
+                    return false;
+                }
+            }
+            for(int i = y1; i <= y2; i++)
+            {
+                if(!Field.areNeighborsFree(x1, i, field))
+                {
+                    return false;
+                }
+            }
+            for(int i = y2; i <= y1; i++)
+            {
+                if(!Field.areNeighborsFree(x1, i, field))
+                {
+                    return false;
+                }
+            }
+            if(!Field.areNeighborsFree(x1, y2, field))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        return true;        
+    }
     
     private static void makePlayerTurn(Field f1, BufferedReader br)
     {
@@ -154,6 +198,10 @@ public class Main
                 if (f1.getCell(x, y) == 1)
                 {
                     f1.setCell(x, y, 3);
+                    if(shipIsDestroyed(x, y, f1))
+                    {
+                        destroyShipSurroundings(x, y, f1);
+                    }
                     turn = true;
                 }
                 if (f1.getCell(x, y) == 0)
@@ -172,6 +220,158 @@ public class Main
             writeln("Please write a number from 0 to "
                     + Integer.toString(size) + ", not anything else");
         }
+    }
+    
+    private static void destroyShipSurroundings(int x, int y, Field f1)
+    {
+        int size = f1.getSize();
+        while(f1.isValidCoord(x+1, y, size)
+                                && f1.getCell(x+1, y) == 3)
+        {
+            x++;
+            if(f1.isValidCoord(x, y+1, size))
+            {
+                f1.setCell(x, y, 2);
+            }
+            if(f1.isValidCoord(x, y-1, size))
+            {
+                f1.setCell(x, y-1, 2);
+            }
+        }
+        if(f1.isValidCoord(x+1, y+1, size))
+        {
+            f1.setCell(x+1, y+1, 2);
+        }
+        if(f1.isValidCoord(x+1, y-1, size))
+        {
+            f1.setCell(x+1, y-1, 2);
+        }
+        if(f1.isValidCoord(x+1, y, size))
+        {
+            f1.setCell(x+1, y, 2);
+        }
+        while(f1.isValidCoord(x-1, y, size)
+                && f1.getCell(x-1, y) == 3)
+        {                            
+            x--;
+            if(f1.isValidCoord(x, y+1, size))
+            {
+                f1.setCell(x, y, 2);
+            }
+            if(f1.isValidCoord(x, y-1, size))
+            {
+                f1.setCell(x, y-1, 2);
+            }
+        }
+        if(f1.isValidCoord(x-1, y+1, size))
+        {
+            f1.setCell(x-1, y+1, 2);
+        }
+        if(f1.isValidCoord(x-1, y-1, size))
+        {
+            f1.setCell(x-1, y-1, 2);
+        }
+        if(f1.isValidCoord(x-1, y, size))
+        {
+            f1.setCell(x-1, y, 2);
+        }
+        while(f1.isValidCoord(x, y+1, size)
+                && f1.getCell(x, y+1) == 3)
+        {                            
+            y++;
+            if(f1.isValidCoord(x+1, y, size))
+            {
+                f1.setCell(x+1, y, 2);
+            }
+            if(f1.isValidCoord(x-1, y, size))
+            {
+                f1.setCell(x-1, y, 2);
+            }
+        }
+        if(f1.isValidCoord(x+1, y+1, size))
+        {
+            f1.setCell(x+1, y+1, 2);
+        }
+        if(f1.isValidCoord(x-1, y+1, size))
+        {
+            f1.setCell(x-1, y+1, 2);
+        }
+        if(f1.isValidCoord(x, y+1, size))
+        {
+            f1.setCell(x, y+1, 2);
+        }
+        while(f1.isValidCoord(x, y-1, size)
+                && f1.getCell(x, y-1) == 3)
+        {                            
+            y--;
+            if(f1.isValidCoord(x+1, y, size))
+            {
+                f1.setCell(x+1, y, 2);
+            }
+            if(f1.isValidCoord(x-1, y, size))
+            {
+                f1.setCell(x-1, y, 2);
+            }
+        }
+        if(f1.isValidCoord(x+1, y-1, size))
+        {
+            f1.setCell(x+1, y+1, 2);
+        }
+        if(f1.isValidCoord(x-1, y-1, size))
+        {
+            f1.setCell(x-1, y-1, 2);
+        }
+        if(f1.isValidCoord(x, y-1, size))
+        {
+            f1.setCell(x, y, 2);
+        }
+    }
+    
+    private static boolean shipIsDestroyed(int x, int y, Field f1)
+    {
+        int size = f1.getSize();
+        while((f1.isValidCoord(x+1, y, size)) 
+                && (f1.getCell(x+1, y) != 0)
+                && (f1.getCell(x+1, y) != 2))
+        {
+            x++;
+            if(f1.getCell(x, y) == 1)
+            {
+                return false;
+            }
+        }
+        while((f1.isValidCoord(x-1, y, size)) 
+                && (f1.getCell(x+1, y) != 0)
+                && (f1.getCell(x+1, y) != 2))
+        {
+            x--;
+            if(f1.getCell(x, y) == 1)
+            {
+                return false;
+            }
+        }
+        while((f1.isValidCoord(x, y-1, size))
+                && (f1.getCell(x+1, y) != 0)
+                && (f1.getCell(x+1, y) != 2))
+        {
+            y--;
+            if(f1.getCell(x, y) == 1)
+            {
+                return false;
+            }
+        }
+        while((f1.isValidCoord(x, y+1, size)) 
+                && (f1.getCell(x+1, y) != 0)
+                && (f1.getCell(x+1, y) != 2))
+        {
+            y++;
+            if(f1.getCell(x, y) == 1)
+            {
+                return false;
+            }
+        }
+        return true;
+        
     }
 
     private static void makeComputerTurn(Field f2, Random random)
