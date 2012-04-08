@@ -18,13 +18,13 @@ public class Main
         writeln(" ");
         final int SIZE = f1.getSize();
         Random random = new Random();
-        printInvisibleFields(f1);
+        //printInvisibleFields(f1);
         printInvisibleFields(f2);
         while (!victory)
         {
-            makePlayerTurn(f1, br);
+            //makePlayerTurn(f1, br);
             makeComputerTurn(f2, random);
-            printVisibleField(f1);
+            //printVisibleField(f1);
             printVisibleField(f2);
             victory = (victoryCheck(f1, SIZE) || victoryCheck(f2, SIZE));
         }
@@ -202,7 +202,8 @@ public class Main
                     {
                         destroyShipSurroundings(x, y, f1);
                     }
-                    turn = true;
+                    writeln("Ship hit");
+                    printVisibleField(f1);
                 }
                 if (f1.getCell(x, y) == 0)
                 {
@@ -231,7 +232,7 @@ public class Main
             x++;
             if(f1.isValidCoord(x, y+1, size))
             {
-                f1.setCell(x, y, 2);
+                f1.setCell(x, y+1, 2);
             }
             if(f1.isValidCoord(x, y-1, size))
             {
@@ -256,7 +257,7 @@ public class Main
             x--;
             if(f1.isValidCoord(x, y+1, size))
             {
-                f1.setCell(x, y, 2);
+                f1.setCell(x, y+1, 2);
             }
             if(f1.isValidCoord(x, y-1, size))
             {
@@ -315,7 +316,7 @@ public class Main
         }
         if(f1.isValidCoord(x+1, y-1, size))
         {
-            f1.setCell(x+1, y+1, 2);
+            f1.setCell(x+1, y-1, 2);
         }
         if(f1.isValidCoord(x-1, y-1, size))
         {
@@ -323,7 +324,7 @@ public class Main
         }
         if(f1.isValidCoord(x, y-1, size))
         {
-            f1.setCell(x, y, 2);
+            f1.setCell(x, y-1, 2);
         }
     }
     
@@ -341,8 +342,8 @@ public class Main
             }
         }
         while((f1.isValidCoord(x-1, y, size)) 
-                && (f1.getCell(x+1, y) != 0)
-                && (f1.getCell(x+1, y) != 2))
+                && (f1.getCell(x-1, y) != 0)
+                && (f1.getCell(x-1, y) != 2))
         {
             x--;
             if(f1.getCell(x, y) == 1)
@@ -351,8 +352,8 @@ public class Main
             }
         }
         while((f1.isValidCoord(x, y-1, size))
-                && (f1.getCell(x+1, y) != 0)
-                && (f1.getCell(x+1, y) != 2))
+                && (f1.getCell(x, y-1) != 0)
+                && (f1.getCell(x, y-1) != 2))
         {
             y--;
             if(f1.getCell(x, y) == 1)
@@ -361,8 +362,8 @@ public class Main
             }
         }
         while((f1.isValidCoord(x, y+1, size)) 
-                && (f1.getCell(x+1, y) != 0)
-                && (f1.getCell(x+1, y) != 2))
+                && (f1.getCell(x, y+1) != 0)
+                && (f1.getCell(x, y+1) != 2))
         {
             y++;
             if(f1.getCell(x, y) == 1)
@@ -378,7 +379,8 @@ public class Main
     {
         int size = f2.getSize();
         boolean turn = false;
-        while (!turn) {
+        while (!turn && (almostDestroyedShips(f2)[0] == -1)) 
+        {
             int r1 = Math.abs(random.nextInt()) % (size);
             int r2 = Math.abs(random.nextInt()) % (size);
             if (f2.isValidCoord(r1, r2, size))
@@ -386,11 +388,45 @@ public class Main
                 if (f2.getCell(r1, r2) == 1)
                 {
                     f2.setCell(r1, r2, 3);
-                    turn = true;
+                    if(shipIsDestroyed(r1, r2, f2))
+                    {
+                        destroyShipSurroundings(r1, r2, f2);
+                    }
+                    writeln("Ship hit");
+                    printVisibleField(f2);
                 }
                 if (f2.getCell(r1, r2) == 0)
                 {
                     f2.setCell(r1, r2, 2);
+                    turn = true;
+                }
+            }
+        }
+        while(!turn && (almostDestroyedShips(f2)[0] != -1))
+        {
+            System.out.println("here");
+            int x = almostDestroyedShips(f2)[0];
+            int y = almostDestroyedShips(f2)[1];
+            int r1 = Math.abs(random.nextInt()) % (3)-1;
+            int r2 = Math.abs(random.nextInt()) % (3)-1;
+            if((f2.isValidCoord(x+r1, y+r2, size))
+                    &&((r1==0)||(r2==0))&&!((r1==0)&&(r2==0)))
+            {
+                x = x+r1;
+                y = y+r2;
+                if (f2.getCell(x, y) == 1)
+                {
+                    f2.setCell(x, y, 3);
+                    if(shipIsDestroyed(x, y, f2))
+                    {
+                        destroyShipSurroundings(x, y, f2);
+                    }
+                    writeln("Ship hit");
+                    printVisibleField(f2);
+                }
+                if (f2.getCell(x, y) == 0)
+                {
+                    f2.setCell(x, y, 2);
                     turn = true;
                 }
             }
@@ -449,6 +485,33 @@ public class Main
             writeln(" ");
         }
         writeln(" ");
+    }
+    
+    private static int[] almostDestroyedShips(Field f1)
+    {
+        int size = f1.getSize();
+        int[] coordinates = new int[2];
+        coordinates[0] = -1;
+        int[][] field = transferFieldIntoIntegers(f1);
+        for(int i = 0; i < size; i++)
+        {
+            for(int j = 0; j < size; j++)
+            {
+                if((field[i][j] == 3)&&(((f1.isValidCoord(i+1, j, size)&&(field[i+1][j] == 1)))
+                        ||((f1.isValidCoord(i-1, j, size)&&(field[i-1][j] == 1)))
+                        ||((f1.isValidCoord(i, j+1, size)&&(field[i][j+1] == 1)))
+                        ||((f1.isValidCoord(i, j-1, size)&&(field[i][j-1] == 1)))
+                        ||((f1.isValidCoord(i+1, j+1, size)&&(field[i+1][j+1] == 1)))
+                        ||((f1.isValidCoord(i+1, j-1, size)&&(field[i+1][j-1] == 1)))
+                        ||((f1.isValidCoord(i-1, j+1, size)&&(field[i-1][j+1] == 1)))
+                        ||((f1.isValidCoord(i-1, j-1, size)&&(field[i-1][j-1] == 1)))))
+                {
+                    coordinates[0] = i;
+                    coordinates[1] = j;
+                }
+            }
+        }
+        return coordinates;
     }
 
     private static boolean victoryCheck(Field f1, int size)
