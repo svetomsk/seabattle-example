@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Main
 {
-
+    static boolean turn;
     public static void main(String[] args) throws IOException
     {
         boolean victory = false;
@@ -186,7 +186,6 @@ public class Main
     
     private static void makePlayerTurn(Field f1, BufferedReader br)
     {
-        boolean turn = false;
         int size = f1.getSize();
         try {
             writeln("Write the x, y coordinate of the cell you want"
@@ -195,21 +194,7 @@ public class Main
             {
                 int x = Integer.valueOf(br.readLine());
                 int y = Integer.valueOf(br.readLine());
-                if (f1.getCell(x, y) == 1)
-                {
-                    f1.setCell(x, y, 3);
-                    if(shipIsDestroyed(x, y, f1))
-                    {
-                        destroyShipSurroundings(x, y, f1);
-                    }
-                    writeln("Ship hit");
-                    printVisibleField(f1);
-                }
-                if (f1.getCell(x, y) == 0)
-                {
-                    f1.setCell(x, y, 2);
-                    turn = true;
-                }
+                destroyCell(x, y, f1);
                 if (!turn)
                 {
                     writeln("Choose an undestroyed cell");
@@ -226,6 +211,18 @@ public class Main
     private static void destroyShipSurroundings(int x, int y, Field f1)
     {
         int size = f1.getSize();
+        //dealing with little bug of not working with (x;y+1) and (x;y-1)
+        if(f1.isValidCoord(x, y+1, size)
+                                && f1.getCell(x, y+1) == 0)
+        {
+            f1.setCell(x, y+1, 2);
+        }
+            if(f1.isValidCoord(x, y-1, size)
+                                && f1.getCell(x, y-1) == 0)
+        {
+            f1.setCell(x, y-1, 2);
+        }
+            //the end of dealing with bug
         while(f1.isValidCoord(x+1, y, size)
                                 && f1.getCell(x+1, y) == 3)
         {
@@ -253,7 +250,7 @@ public class Main
         }
         while(f1.isValidCoord(x-1, y, size)
                 && f1.getCell(x-1, y) == 3)
-        {                            
+        {            
             x--;
             if(f1.isValidCoord(x, y+1, size))
             {
@@ -278,7 +275,7 @@ public class Main
         }
         while(f1.isValidCoord(x, y+1, size)
                 && f1.getCell(x, y+1) == 3)
-        {                            
+        {  
             y++;
             if(f1.isValidCoord(x+1, y, size))
             {
@@ -303,7 +300,7 @@ public class Main
         }
         while(f1.isValidCoord(x, y-1, size)
                 && f1.getCell(x, y-1) == 3)
-        {                            
+        { 
             y--;
             if(f1.isValidCoord(x+1, y, size))
             {
@@ -378,35 +375,39 @@ public class Main
     private static void makeComputerTurn(Field f2, Random random)
     {
         int size = f2.getSize();
-        boolean turn = false;
         while (!turn && (almostDestroyedShips(f2)[0] == -1)) 
         {
             int r1 = Math.abs(random.nextInt()) % (size);
             int r2 = Math.abs(random.nextInt()) % (size);
             if (f2.isValidCoord(r1, r2, size))
             {
-                if (f2.getCell(r1, r2) == 1)
-                {
-                    f2.setCell(r1, r2, 3);
-                    if(shipIsDestroyed(r1, r2, f2))
-                    {
-                        destroyShipSurroundings(r1, r2, f2);
-                    }
-                    writeln("Ship hit");
-                    printVisibleField(f2);
-                }
-                if (f2.getCell(r1, r2) == 0)
-                {
-                    f2.setCell(r1, r2, 2);
-                    turn = true;
-                }
+                destroyCell(r1, r2, f2);
             }
         }
         while(!turn && (almostDestroyedShips(f2)[0] != -1))
         {
-            System.out.println("here");
             int x = almostDestroyedShips(f2)[0];
             int y = almostDestroyedShips(f2)[1];
+            if((f2.isValidCoord(x-1, y, size)) && f2.getCell(x+1, y)==3 &&
+                f2.getCell(x-1, y)!=2)
+            {
+                destroyCell(x-1, y, f2);
+            }
+            if((f2.isValidCoord(x-1, y, size)) && f2.getCell(x+1, y)==3 &&
+                f2.getCell(x-1, y)==2)
+            {
+                destroyingDefinedShipHorisontal(x, y, f2);
+            }
+            if((f2.isValidCoord(x, y-1, size)) && f2.getCell(x, y+1)==3 &&
+                f2.getCell(x, y-1)!=2)
+            {
+                destroyCell(x-1, y, f2);
+            }
+            if((f2.isValidCoord(x, y-1, size)) && f2.getCell(x, y+1)==3 &&
+                f2.getCell(x, y-1)==2)
+            {
+                destroyingDefinedShipVertical(x, y, f2);
+            }
             int r1 = Math.abs(random.nextInt()) % (3)-1;
             int r2 = Math.abs(random.nextInt()) % (3)-1;
             if((f2.isValidCoord(x+r1, y+r2, size))
@@ -414,14 +415,25 @@ public class Main
             {
                 x = x+r1;
                 y = y+r2;
-                if (f2.getCell(x, y) == 1)
+                destroyCell(x, y, f2);
+            }
+        }
+    }
+    
+    private static void destroyCell(int x, int y, Field f2)
+    {
+        if (f2.getCell(x, y) == 1)
                 {
                     f2.setCell(x, y, 3);
                     if(shipIsDestroyed(x, y, f2))
                     {
                         destroyShipSurroundings(x, y, f2);
+                        writeln("Ship destroyed");
                     }
-                    writeln("Ship hit");
+                    else
+                    {
+                        writeln("Ship hit");
+                    }
                     printVisibleField(f2);
                 }
                 if (f2.getCell(x, y) == 0)
@@ -429,8 +441,24 @@ public class Main
                     f2.setCell(x, y, 2);
                     turn = true;
                 }
-            }
+    }
+    
+    private static void destroyingDefinedShipHorisontal(int x, int y, Field f2)
+    {
+        while(f2.isValidCoord(x+1, y) && (f2.getCell(x+1, y))==3)
+        {
+            x++;
         }
+        destroyCell(x+1, y, f2);
+    }
+    
+    private static void destroyingDefinedShipVertical(int x, int y, Field f2)
+    {
+        while(f2.isValidCoord(x, y+1) && f2.getCell(x, y+1) == 3)
+        {
+            y++;
+        }
+        destroyCell(x, y+1, f2);
     }
 
     private static void printVisibleField(Field f1)
