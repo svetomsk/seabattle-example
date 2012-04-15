@@ -6,11 +6,12 @@ import java.util.Random;
 public class Field
     {
 
-     private static final int SIZE = 7; //const used for size of the field
+     private static final int SIZE = 12; //const used for size of the field
      private static final int s = 0;    //quantity of 1x1(small) ships
      private static final int m = 0;    //quantity of 1x2(medium) ships
      private static final int b = 0;    //quantity of 1x3(big) ships
-     private static final int h = 1;    //quantity of 1x4(huge) ships
+     private static final int h = 0;    //quantity of 1x4(huge) ships
+     private static final int u = 1;    //quantity of 1x8(ultimate) ships
 
      private static int [][] neighbors;
 
@@ -99,6 +100,10 @@ public class Field
         for(int i = 0; i < h; i++)
         {
             fillShipByRandom(random, field, 4);
+        }
+        for(int i = 0; i < u; i++)
+        {
+            fillShipByRandom(random, field, 8);
         }
     }
     
