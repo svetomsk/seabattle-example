@@ -13,18 +13,17 @@ public class Main
         Field f1 = new Field();
         Field f2 = new Field();
         f1.fillFieldByRandom();
-        f2.fillFieldByRandom();
-//        fillFieldByPlayer(f2, br);
+        fillFieldByPlayer(f2, br);
         writeln(" ");
         final int SIZE = f1.getSize();
         Random random = new Random();
-        //printInvisibleFields(f1);
+        writeln("Your field:");
         printInvisibleFields(f2);
         while (!victory)
         {
-            //makePlayerTurn(f1, br);
+            makePlayerTurn(f1, br);
             makeComputerTurn(f2, random);
-            //printVisibleField(f1);
+            printVisibleField(f1);
             printVisibleField(f2);
             victory = (victoryCheck(f1, SIZE) || victoryCheck(f2, SIZE));
         }
@@ -54,6 +53,7 @@ public class Main
         }
         return Field;
     }
+    
 
     private static void fillFieldByPlayer(Field f2, BufferedReader br)
     {
@@ -66,29 +66,29 @@ public class Main
         for(int i = 0; i < s; i++)
         {
             writeln("<small>");
-            fillFieldWithShipsByPlayer(f2, br, s, size, 0, Field);
+            fillFieldWithShipsByPlayer(f2, br, size, 0, Field);
         }
         for(int i = 0; i < m; i++)
         {
             writeln("<medium>");
-            fillFieldWithShipsByPlayer(f2, br, s, size, 1, Field);
+            fillFieldWithShipsByPlayer(f2, br, size, 1, Field);
         }
         for(int i = 0; i < b; i++)
         {
             writeln("<big>");
-            fillFieldWithShipsByPlayer(f2, br, s, size, 2, Field);
+            fillFieldWithShipsByPlayer(f2, br, size, 2, Field);
         }
         for(int i = 0; i < h; i++)
         {
             writeln("<huge>");
-            fillFieldWithShipsByPlayer(f2, br, s, size, 3, Field);
+            fillFieldWithShipsByPlayer(f2, br, size, 3, Field);
         }
     }
 
     private static void fillFieldWithShipsByPlayer(Field f2, 
-            BufferedReader br,int s, int size, int l, int[][] Field)
+            BufferedReader br, int size, int l, int[][] Field)
     {
-        for (int k = 0; k < s;)
+        for (int k = 0; k < 1;)
         {
             try {
                 writeln("Write the x1, y1, x2, y2 coordinates of the cell you want"
@@ -99,7 +99,7 @@ public class Main
                 int y2 = Integer.valueOf(br.readLine());
                 if (((x1 == x2) || (y1 == y2))
                         && canPlaceShipHere(x1, y1, x2, y2, Field)
-                        && ((Math.abs(x1-x2) == l) || (Math.abs(y1-y2) == l)))
+                        && ((Math.abs(x1-x2) >= l) || (Math.abs(y1-y2) >= l)))
 
                 {
                     for(int i = x1; i <= x2; i++)
@@ -126,7 +126,7 @@ public class Main
                 }
                 else
                 {
-                    writeln("The cell is placed incorrectly");
+                    writeln("The ship is being placed incorrectly");
                 }
             } 
             catch (IOException e)
@@ -379,7 +379,7 @@ public class Main
     {
         int size = f2.getSize();
         boolean turn = false;
-        while (!turn && (almostDestroyedShips(f2)[0] == -1)) 
+        while (!turn && (almostDestroyedShips(f2)[0] == -1)) //randoming cells, no choise
         {
             int r1 = Math.abs(random.nextInt()) % (size);
             int r2 = Math.abs(random.nextInt()) % (size);
@@ -392,7 +392,7 @@ public class Main
                     {
                         destroyShipSurroundings(r1, r2, f2);
                     }
-                    writeln("Ship hit");
+                    writeln("Ship hit or destroyed");
                     printVisibleField(f2);
                 }
                 if (f2.getCell(r1, r2) == 0)
@@ -402,32 +402,79 @@ public class Main
                 }
             }
         }
-        while(!turn && (almostDestroyedShips(f2)[0] != -1))
+        while(!turn && (almostDestroyedShips(f2)[0] != -1)) //acting like primitive AI
         {
-            System.out.println("here");
             int x = almostDestroyedShips(f2)[0];
             int y = almostDestroyedShips(f2)[1];
-            int r1 = Math.abs(random.nextInt()) % (3)-1;
-            int r2 = Math.abs(random.nextInt()) % (3)-1;
-            if((f2.isValidCoord(x+r1, y+r2, size))
-                    &&((r1==0)||(r2==0))&&!((r1==0)&&(r2==0)))
+            if((f2.isValidCoord(x+1, y, size)) && f2.getCell(x+1, y) == 1)
             {
-                x = x+r1;
-                y = y+r2;
-                if (f2.getCell(x, y) == 1)
+                if((f2.isValidCoord(x-1, y, size)) && f2.getCell(x-1, y) == 0)
                 {
-                    f2.setCell(x, y, 3);
-                    if(shipIsDestroyed(x, y, f2))
+                    x = x-1;
+                    if (f2.getCell(x, y) == 1)
                     {
-                        destroyShipSurroundings(x, y, f2);
+                        f2.setCell(x, y, 3);
+                        if(shipIsDestroyed(x, y, f2))
+                        {
+                            destroyShipSurroundings(x, y, f2);
+                        }
+                        writeln("Ship hit or destroyed");
+                        printVisibleField(f2);
                     }
-                    writeln("Ship hit");
-                    printVisibleField(f2);
+                    if (f2.getCell(x, y) == 0)
+                    {
+                        f2.setCell(x, y, 2);
+                        turn = true;
+                    }
                 }
-                if (f2.getCell(x, y) == 0)
+                else
                 {
-                    f2.setCell(x, y, 2);
-                    turn = true;
+                    while((f2.isValidCoord(x+1, y, size)) && f2.getCell(x+1, y) == 1)
+                    {
+                        x++;
+                    }
+                    x++;
+                    if (f2.getCell(x, y) == 1)
+                    {
+                        f2.setCell(x, y, 3);
+                        if(shipIsDestroyed(x, y, f2))
+                        {
+                            destroyShipSurroundings(x, y, f2);
+                        }
+                        writeln("Ship hit or destroyed");
+                        printVisibleField(f2);
+                    }
+                    if (f2.getCell(x, y) == 0)
+                    {
+                        f2.setCell(x, y, 2);
+                        turn = true;
+                    }
+                }
+            }
+            else
+            {
+                int r1 = Math.abs(random.nextInt()) % (3)-1;
+                int r2 = Math.abs(random.nextInt()) % (3)-1;
+                if((f2.isValidCoord(x+r1, y+r2, size))
+                        &&((r1==0)||(r2==0))&&!((r1==0)&&(r2==0)))
+                {
+                    x = x+r1;
+                    y = y+r2;
+                    if (f2.getCell(x, y) == 1)
+                    {
+                        f2.setCell(x, y, 3);
+                        if(shipIsDestroyed(x, y, f2))
+                        {
+                            destroyShipSurroundings(x, y, f2);
+                        }
+                        writeln("Ship hit or destroyed");
+                        printVisibleField(f2);
+                    }
+                    if (f2.getCell(x, y) == 0)
+                    {
+                        f2.setCell(x, y, 2);
+                        turn = true;
+                    }
                 }
             }
         }
